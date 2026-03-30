@@ -1,0 +1,27 @@
+<view class="container">
+  <view class="map-container">
+    <map 
+      id="map" 
+      style="width: 100%; height: 100%;" 
+      latitude="{{latitude}}" 
+      longitude="{{longitude}}" 
+      scale="15"
+      show-location="true"
+    ></map>
+  </view>
+  <view class="call-form">
+    <view class="location-item">
+      <view class="location-icon start"></view>
+      <view class="location-input">
+        <input placeholder="请输入起点" value="{{startLocation}}" bindinput="inputStartLocation" />
+      </view>
+    </view>
+    <view class="location-item">
+      <view class="location-icon end"></view>
+      <view class="location-input">
+        <input placeholder="请输入终点" value="{{endLocation}}" bindinput="inputEndLocation" />
+      </view>
+    </view>
+    <button class="call-btn" bindtap="viewRoute">查看路线</button>
+  </view>
+</view>

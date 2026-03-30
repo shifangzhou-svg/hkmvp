@@ -1,0 +1,48 @@
+<view class="container">
+  <view class="header">
+    <view class="location-info">
+      <view class="location-item">
+        <view class="dot start"></view>
+        <text class="location-text">{{startLocation}}</text>
+      </view>
+      <view class="arrow">↓</view>
+      <view class="location-item">
+        <view class="dot end"></view>
+        <text class="location-text">{{endLocation}}</text>
+      </view>
+    </view>
+  </view>
+  
+  <view class="map-container">
+    <map 
+      id="routeMap" 
+      style="width: 100%; height: 100%;" 
+      latitude="{{latitude}}" 
+      longitude="{{longitude}}" 
+      scale="12"
+      show-location="true"
+      polyline="{{polyline}}"
+      markers="{{markers}}"
+    ></map>
+  </view>
+  
+  <view class="route-info">
+    <view class="info-item">
+      <text class="label">距离</text>
+      <text class="value">{{distance}} 公里</text>
+    </view>
+    <view class="info-item">
+      <text class="label">预计时间</text>
+      <text class="value">{{duration}} 分钟</text>
+    </view>
+    <view class="info-item">
+      <text class="label">预估价格</text>
+      <text class="value price">¥{{price}}</text>
+    </view>
+  </view>
+  
+  <view class="action-bar">
+    <button class="back-btn" bindtap="goBack">返回修改</button>
+    <button class="confirm-btn" bindtap="confirmOrder">确认叫车</button>
+  </view>
+</view>

@@ -1,0 +1,23 @@
+<view class="container">
+  <view class="logo">
+    <text class="title">滴滴打车</text>
+  </view>
+  <view class="form">
+    <view class="input-group">
+      <input type="number" placeholder="请输入手机号" bindinput="inputPhone" />
+    </view>
+    <view class="input-group">
+      <input type="text" placeholder="请输入验证码" bindinput="inputCode" />
+      <button class="code-btn" bindtap="getCode" disabled="{{countdown > 0}}">
+        {{countdown > 0 ? countdown + '秒后重发' : '获取验证码'}}
+      </button>
+    </view>
+    <button class="login-btn" bindtap="login">登录</button>
+  </view>
+  <view class="tips">
+    <text>登录即表示同意</text>
+    <text class="link">用户协议</text>
+    <text>和</text>
+    <text class="link">隐私政策</text>
+  </view>
+</view>

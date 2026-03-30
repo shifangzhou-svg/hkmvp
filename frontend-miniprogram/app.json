@@ -1,0 +1,39 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/call-taxi/call-taxi",
+    "pages/route-plan/route-plan"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "滴滴打车",
+    "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "list": [
+      {
+        "pagePath": "pages/call-taxi/call-taxi",
+        "text": "叫车",
+        "iconPath": "pages/images/call-taxi.png",
+        "selectedIconPath": "pages/images/call-taxi-active.png"
+      },
+      {
+        "pagePath": "pages/login/login",
+        "text": "我的",
+        "iconPath": "pages/images/profile.png",
+        "selectedIconPath": "pages/images/profile-active.png"
+      }
+    ]
+  },
+  "requiredPrivateInfos": [
+    "getLocation",
+    "startLocationUpdate"
+  ],
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于获取您的位置信息，以便为您推荐附近的司机"
+    }
+  },
+  "sitemapLocation": "sitemap.json"
+}
