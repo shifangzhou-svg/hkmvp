@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const { pool, testConnection } = require('./db');
+const fetch = require('node-fetch');
 
 // 加载环境变量
 dotenv.config();
@@ -12,6 +13,10 @@ const port = process.env.PORT || 3000;
 // 中间件
 app.use(cors());
 app.use(express.json());
+
+// 静态文件服务
+app.use('/backend-admin', express.static('../backend-admin'));
+app.use('/frontend-miniprogram', express.static('../frontend-miniprogram'));
 
 // 测试路由
 app.get('/', (req, res) => {
