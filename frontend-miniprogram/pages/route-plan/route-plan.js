@@ -60,7 +60,7 @@ if (typeof Page !== 'undefined') {
           latitude: startLat,
           longitude: startLng,
           title: '起点',
-          iconPath: '/pages/images/start.png',
+          iconPath: '/pages/images/call-taxi.png',
           width: 30,
           height: 30
         },
@@ -69,31 +69,99 @@ if (typeof Page !== 'undefined') {
           latitude: endLat,
           longitude: endLng,
           title: '终点',
-          iconPath: '/pages/images/end.png',
+          iconPath: '/pages/images/profile.png',
           width: 30,
           height: 30
         }
       ];
 
-      // 创建路线（简单的直线，实际应该使用高德地图API规划路线）
-      const polyline = [{
-        points: [
-          { latitude: startLat, longitude: startLng },
-          { latitude: endLat, longitude: endLng }
-        ],
-        color: '#ff6700',
-        width: 4,
-        dottedLine: false
-      }];
-
-      this.setData({
-        latitude: centerLat,
-        longitude: centerLng,
-        distance: distance.toFixed(1),
-        duration: duration,
-        price: price,
-        markers: markers,
-        polyline: polyline
+      // 调用高德地图路径规划API
+      const amapKey = '945354d18d7a81fed75ecf12258fabbe'; // 使用用户提供的高德地图Web端API密钥
+      const url = `https://restapi.amap.com/v3/direction/driving?origin=${startLng},${startLat}&destination=${endLng},${endLat}&key=${amapKey}`;
+      
+      console.log('路径规划API请求:', url);
+      
+      wx.request({
+        url: url,
+        method: 'GET',
+        success: (res) => {
+          console.log('路径规划API响应:', res);
+          
+          let polyline = [];
+          
+          if (res.data.status === '1' && res.data.route && res.data.route.paths && res.data.route.paths.length > 0) {
+            // 处理路径数据
+            const path = res.data.route.paths[0];
+            const steps = path.steps;
+            
+            // 构建路径点
+            let points = [];
+            
+            // 解析每一步的polyline
+            steps.forEach(step => {
+              if (step.polyline) {
+                const polylinePoints = step.polyline.split(';');
+                polylinePoints.forEach(pointStr => {
+                  const [lng, lat] = pointStr.split(',').map(Number);
+                  points.push({ latitude: lat, longitude: lng });
+                });
+              }
+            });
+            
+            // 创建路径
+            polyline = [{
+              points: points,
+              color: '#ff6700',
+              width: 4,
+              dottedLine: false
+            }];
+          } else {
+            // 如果API调用失败，使用简单的直线连接
+            console.log('路径规划API调用失败，使用简单直线连接');
+            polyline = [{
+              points: [
+                { latitude: startLat, longitude: startLng },
+                { latitude: endLat, longitude: endLng }
+              ],
+              color: '#ff6700',
+              width: 4,
+              dottedLine: false
+            }];
+          }
+          
+          this.setData({
+            latitude: centerLat,
+            longitude: centerLng,
+            distance: distance.toFixed(1),
+            duration: duration,
+            price: price,
+            markers: markers,
+            polyline: polyline
+          });
+        },
+        fail: (error) => {
+          console.error('路径规划失败:', error);
+          // 如果API调用失败，使用简单的直线连接
+          const polyline = [{
+            points: [
+              { latitude: startLat, longitude: startLng },
+              { latitude: endLat, longitude: endLng }
+            ],
+            color: '#ff6700',
+            width: 4,
+            dottedLine: false
+          }];
+          
+          this.setData({
+            latitude: centerLat,
+            longitude: centerLng,
+            distance: distance.toFixed(1),
+            duration: duration,
+            price: price,
+            markers: markers,
+            polyline: polyline
+          });
+        }
       });
     },
 
@@ -146,14 +214,14 @@ if (typeof Page !== 'undefined') {
           'Authorization': 'Bearer ' + token
         },
         data: {
-          user_id: userInfo.userId,
-          start_location: startLocation,
-          start_lat: startLat,
-          start_lng: startLng,
-          end_location: endLocation,
-          end_lat: endLat,
-          end_lng: endLng,
-          price: price
+          userId: userInfo.userId,
+          startLocation: startLocation,
+          startLat: startLat,
+          startLng: startLng,
+          endLocation: endLocation,
+          endLat: endLat,
+          endLng: endLng,
+          estimatedPrice: price
         },
         success: (res) => {
           wx.hideLoading();
@@ -163,11 +231,9 @@ if (typeof Page !== 'undefined') {
               icon: 'success'
             });
             // 跳转到订单页面或首页
-            setTimeout(() => {
-              wx.switchTab({
-                url: '/pages/call-taxi/call-taxi'
-              });
-            }, 1500);
+            wx.switchTab({
+              url: '/pages/call-taxi/call-taxi'
+            });
           } else {
             wx.showToast({
               title: '下单失败',

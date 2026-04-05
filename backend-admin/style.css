@@ -21,6 +21,42 @@ h1 {
   color: #333;
 }
 
+/* 导航菜单样式 */
+.nav {
+  display: flex;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #eee;
+}
+
+.nav-btn {
+  padding: 10px 20px;
+  background-color: #f0f0f0;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.nav-btn.active {
+  background-color: white;
+  border-bottom-color: #ff6700;
+  font-weight: bold;
+}
+
+/* 标签页内容样式 */
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
 .map-container {
   margin-bottom: 30px;
   border-radius: 8px;
@@ -75,5 +111,125 @@ li:last-child {
 
 .status.busy {
   background-color: #ff9800;
+  color: white;
+}
+
+/* 订单管理样式 */
+.order-filter {
+  display: flex;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.order-filter select {
+  padding: 8px;
+  margin-right: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.order-filter button {
+  padding: 8px 16px;
+  background-color: #ff6700;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.order-list {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.order-item {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+}
+
+.order-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.order-id {
+  font-weight: bold;
+  color: #333;
+}
+
+.order-status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.order-status.pending {
+  background-color: #ffc107;
+  color: #333;
+}
+
+.order-status.accepted {
+  background-color: #2196f3;
+  color: white;
+}
+
+.order-status.completed {
+  background-color: #4caf50;
+  color: white;
+}
+
+.order-status.cancelled {
+  background-color: #f44336;
+  color: white;
+}
+
+.order-info {
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+.order-location {
+  margin-bottom: 5px;
+}
+
+.order-time {
+  font-size: 12px;
+  color: #999;
+}
+
+.order-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.order-actions button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.btn-primary {
+  background-color: #ff6700;
+  color: white;
+}
+
+.btn-secondary {
+  background-color: #9e9e9e;
   color: white;
 }

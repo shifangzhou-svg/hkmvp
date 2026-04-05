@@ -51,6 +51,25 @@
   width: 100%;
 }
 
+.form-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.form-label {
+  width: 120rpx;
+  font-size: 28rpx;
+  color: #666;
+}
+
+.picker {
+  flex: 1;
+  font-size: 28rpx;
+  padding: 10rpx 0;
+  border-bottom: 1rpx solid #eee;
+}
+
 .call-btn {
   width: 100%;
   height: 80rpx;
@@ -60,4 +79,9 @@
   background-color: #ff6700;
   border-radius: 8rpx;
   margin-top: 20rpx;
+}
+
+.call-btn.primary {
+  background-color: #4caf50;
+  margin-top: 15rpx;
 }

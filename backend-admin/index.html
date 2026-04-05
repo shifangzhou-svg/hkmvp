@@ -1,24 +1,471 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>后台管理系统</title>
-  <link rel="stylesheet" href="style.css">
-  <!-- 引入高德地图API -->
-  <script type="text/javascript" src="https://webapi.amap.com/maps?v=2.0&key=945354d18d7a81fed75ecf12258fabbe"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom-color: #ff6700;
+            color: #ff6700;
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .order-list {
+            list-style: none;
+        }
+        
+        .order-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .order-id {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .order-status {
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+        
+        .status-pending {
+            background-color: #ffeb3b;
+            color: #333;
+        }
+        
+        .status-accepted {
+            background-color: #4caf50;
+            color: white;
+        }
+        
+        .status-completed {
+            background-color: #2196f3;
+            color: white;
+        }
+        
+        .status-cancelled {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .order-locations {
+            margin: 10px 0;
+        }
+        
+        .location-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        
+        .location-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .dot-start {
+            background-color: #4caf50;
+        }
+        
+        .dot-end {
+            background-color: #f44336;
+        }
+        
+        .driver-list {
+            margin: 15px 0;
+        }
+        
+        .driver-item {
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .driver-info {
+            flex: 1;
+        }
+        
+        .driver-distance {
+            margin-left: 20px;
+            color: #666;
+        }
+        
+        .assign-btn {
+            padding: 5px 15px;
+            background-color: #ff6700;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .assign-btn:hover {
+            background-color: #e65c00;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>后台管理系统</h1>
-    <div class="map-container">
-      <div id="map" style="width: 100%; height: 600px;"></div>
+    <div class="container">
+        <h1>订单管理系统</h1>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="pending">待处理订单</div>
+            <div class="tab" data-tab="accepted">已接订单</div>
+            <div class="tab" data-tab="completed">已完成订单</div>
+        </div>
+        
+        <div class="tab-content active" id="pending">
+            <div class="loading">加载中...</div>
+            <ul class="order-list" id="pending-orders"></ul>
+        </div>
+        
+        <div class="tab-content" id="accepted">
+            <div class="loading">加载中...</div>
+            <ul class="order-list" id="accepted-orders"></ul>
+        </div>
+        
+        <div class="tab-content" id="completed">
+            <div class="loading">加载中...</div>
+            <ul class="order-list" id="completed-orders"></ul>
+        </div>
     </div>
-    <div class="driver-list">
-      <h2>司机列表</h2>
-      <ul id="driver-list"></ul>
-    </div>
-  </div>
-  <script src="script.js"></script>
+    
+    <script>
+        // API基础URL
+        const API_BASE = 'http://localhost:3000/api';
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化标签页
+            initTabs();
+            
+            // 加载待处理订单
+            loadPendingOrders();
+        });
+        
+        // 初始化标签页
+        function initTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.dataset.tab;
+                    
+                    // 切换标签页
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    this.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                    
+                    // 加载对应标签页的数据
+                    if (tabId === 'pending') {
+                        loadPendingOrders();
+                    } else if (tabId === 'accepted') {
+                        loadOrders('accepted');
+                    } else if (tabId === 'completed') {
+                        loadOrders('completed');
+                    }
+                });
+            });
+        }
+        
+        // 加载待处理订单
+        function loadPendingOrders() {
+            const container = document.getElementById('pending-orders');
+            container.innerHTML = '<div class="loading">加载中...</div>';
+            
+            // 先获取待处理订单
+            fetch(`${API_BASE}/orders?status=pending`)
+                .then(response => response.json())
+                .then(orders => {
+                    // 检查 orders 是否是数组
+                    if (!Array.isArray(orders)) {
+                        console.error('API 返回的数据不是数组:', orders);
+                        container.innerHTML = '<div class="loading">加载失败，请刷新页面</div>';
+                        return;
+                    }
+                    
+                    if (orders.length === 0) {
+                        container.innerHTML = '<div class="loading">暂无待处理订单</div>';
+                        return;
+                    }
+                    
+                    // 再获取所有在线司机
+                    return fetch(`${API_BASE}/drivers`)
+                        .then(response => response.json())
+                        .then(drivers => {
+                            // 为每个订单添加附近司机信息
+                            const ordersWithDrivers = orders.map(order => {
+                                // 计算司机到起点的距离
+                                const driversWithDistance = drivers.map(driver => {
+                                    if (driver.lat && driver.lng) {
+                                        // 计算距离（简化版）
+                                        const distance = Math.sqrt(
+                                            Math.pow(driver.lat - order.start_lat, 2) +
+                                            Math.pow(driver.lng - order.start_lng, 2)
+                                        ) * 111; // 转换为公里
+                                        return { ...driver, distance };
+                                    }
+                                    return { ...driver, distance: Infinity };
+                                });
+                                
+                                // 按距离排序
+                                driversWithDistance.sort((a, b) => a.distance - b.distance);
+                                
+                                // 取前3个最近的司机
+                                const nearbyDrivers = driversWithDistance.slice(0, 3);
+                                
+                                return { ...order, nearby_drivers: nearbyDrivers };
+                            });
+                            
+                            return ordersWithDrivers;
+                        });
+                })
+                .then(ordersWithDrivers => {
+                    container.innerHTML = '';
+                    ordersWithDrivers.forEach(order => {
+                        const orderItem = createOrderItem(order, true);
+                        container.appendChild(orderItem);
+                    });
+                })
+                .catch(error => {
+                    console.error('加载订单失败:', error);
+                    container.innerHTML = '<div class="loading">加载失败，请刷新页面</div>';
+                });
+        }
+        
+        // 加载订单列表
+        function loadOrders(status) {
+            const container = document.getElementById(`${status}-orders`);
+            container.innerHTML = '<div class="loading">加载中...</div>';
+            
+            fetch(`${API_BASE}/orders?status=${status}`)
+                .then(response => response.json())
+                .then(orders => {
+                    // 检查 orders 是否是数组
+                    if (!Array.isArray(orders)) {
+                        console.error('API 返回的数据不是数组:', orders);
+                        container.innerHTML = '<div class="loading">加载失败，请刷新页面</div>';
+                        return;
+                    }
+                    
+                    if (orders.length === 0) {
+                        container.innerHTML = `<div class="loading">暂无${getStatusText(status)}订单</div>`;
+                        return;
+                    }
+                    
+                    container.innerHTML = '';
+                    orders.forEach(order => {
+                        const orderItem = createOrderItem(order, false);
+                        container.appendChild(orderItem);
+                    });
+                })
+                .catch(error => {
+                    console.error('加载订单失败:', error);
+                    container.innerHTML = '<div class="loading">加载失败，请刷新页面</div>';
+                });
+        }
+        
+        // 创建订单项
+        function createOrderItem(order, showDrivers) {
+            const li = document.createElement('li');
+            li.className = 'order-item';
+            
+            // 订单头部
+            const header = document.createElement('div');
+            header.className = 'order-header';
+            header.innerHTML = `
+                <span class="order-id">订单号: ${order.id}</span>
+                <span class="order-status status-${order.status}">${getStatusText(order.status)}</span>
+            `;
+            
+            // 订单位置信息
+            const locations = document.createElement('div');
+            locations.className = 'order-locations';
+            locations.innerHTML = `
+                <div class="location-item">
+                    <div class="location-dot dot-start"></div>
+                    <span>${order.start_location}</span>
+                </div>
+                <div class="location-item">
+                    <div class="location-dot dot-end"></div>
+                    <span>${order.end_location}</span>
+                </div>
+            `;
+            
+            // 订单其他信息
+            const info = document.createElement('div');
+            info.innerHTML = `
+                <p>用户: ${order.user_phone || '未知'}</p>
+                <p>预约时间: ${formatDate(order.reservation_time)}</p>
+                <p>车型: ${order.car_type}</p>
+                <p>预估价格: ¥${order.estimated_price}</p>
+            `;
+            
+            // 司机信息
+            let driverInfo = '';
+            if (order.driver_id) {
+                driverInfo = `
+                    <p>司机: ${order.driver_name || '未知'} (${order.driver_phone || '未知'})</p>
+                    <p>车牌号: ${order.license_plate || '未知'}</p>
+                `;
+            }
+            
+            // 附近司机列表
+            let driverList = '';
+            if (showDrivers && order.nearby_drivers && order.nearby_drivers.length > 0) {
+                driverList = `
+                    <div class="driver-list">
+                        <h4>附近司机:</h4>
+                        ${order.nearby_drivers.map(driver => `
+                            <div class="driver-item">
+                                <div class="driver-info">
+                                    <strong>${driver.name}</strong> (${driver.phone})<br>
+                                    车牌号: ${driver.license_plate}
+                                </div>
+                                <div class="driver-distance">
+                                    ${driver.distance.toFixed(2)} km
+                                </div>
+                                <button class="assign-btn" onclick="assignDriver(${order.id}, ${driver.id})">
+                                    分配
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            li.innerHTML = `
+                ${header.outerHTML}
+                ${locations.outerHTML}
+                ${info.outerHTML}
+                ${driverInfo}
+                ${driverList}
+            `;
+            
+            return li;
+        }
+        
+        // 分配司机
+        function assignDriver(orderId, driverId) {
+            if (confirm('确定要分配此司机吗？')) {
+                fetch(`${API_BASE}/orders/${orderId}/assign`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ driver_id: driverId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('司机分配成功！');
+                        // 刷新待处理订单列表
+                        loadPendingOrders();
+                    } else {
+                        alert('分配失败: ' + (data.error || '未知错误'));
+                    }
+                })
+                .catch(error => {
+                    console.error('分配司机失败:', error);
+                    alert('分配失败，请重试');
+                });
+            }
+        }
+        
+        // 格式化日期
+        function formatDate(dateString) {
+            if (!dateString) return '未知';
+            const date = new Date(dateString);
+            return date.toLocaleString('zh-CN');
+        }
+        
+        // 获取状态文本
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': '待处理',
+                'accepted': '已接单',
+                'completed': '已完成',
+                'cancelled': '已取消'
+            };
+            return statusMap[status] || status;
+        }
+    </script>
 </body>
 </html>

@@ -2,7 +2,8 @@
   "pages": [
     "pages/login/login",
     "pages/call-taxi/call-taxi",
-    "pages/route-plan/route-plan"
+    "pages/route-plan/route-plan",
+    "pages/search/search"
   ],
   "window": {
     "backgroundTextStyle": "light",

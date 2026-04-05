@@ -1,0 +1,76 @@
+<view class="container">
+  <!-- 顶部搜索栏 -->
+  <view class="search-bar">
+    <view class="search-input-container">
+      <view class="search-icon">🔍</view>
+      <input 
+        placeholder="搜索地址" 
+        value="{{keyword}}" 
+        bindinput="inputKeyword" 
+        focus="{{true}}"
+      />
+      <view wx:if="{{keyword}}" class="clear-icon" bindtap="clearKeyword">✕</view>
+    </view>
+    <button bindtap="cancelSearch">取消</button>
+  </view>
+  
+  <!-- 快捷选项 -->
+  <view class="quick-options">
+    <view class="quick-option" bindtap="useMyLocation">
+      <view class="option-icon">📍</view>
+      <text>我的位置</text>
+    </view>
+    <view class="quick-option">
+      <view class="option-icon">⭐</view>
+      <text>收藏夹</text>
+    </view>
+    <view class="quick-option" bindtap="mapSelect">
+      <view class="option-icon">🗺️</view>
+      <text>地图选点</text>
+    </view>
+  </view>
+  
+  <!-- 搜索结果 -->
+  <view class="search-results">
+    <!-- 最近使用 -->
+    <view wx:if="{{!keyword && recentLocations.length > 0}}" class="section">
+      <view class="section-title">最近使用</view>
+      <view wx:for="{{recentLocations}}" wx:key="index" class="result-item" bindtap="selectAddress" data-index="{{index}}" data-type="recent">
+        <view class="item-content">
+          <text class="item-name">{{recentLocations[index].name}}</text>
+          <text class="item-address">{{recentLocations[index].address}}</text>
+        </view>
+        <text class="item-distance">{{recentLocations[index].distance}}</text>
+      </view>
+    </view>
+    
+    <!-- 按城市分组的地址 -->
+    <view wx:for="{{Object.keys(cityGroups)}}" wx:key="city" class="section">
+      <view class="section-title">{{item}}</view>
+      <view wx:for="{{cityGroups[item]}}" wx:key="index" class="result-item" bindtap="selectAddress" data-index="{{index}}" data-type="city" data-city="{{item}}">
+        <view class="item-content">
+          <text class="item-name">{{cityGroups[item][index].name}}</text>
+          <text class="item-address">{{cityGroups[item][index].address}}</text>
+        </view>
+        <text class="item-distance">{{cityGroups[item][index].distance}}</text>
+      </view>
+    </view>
+    
+    <!-- 搜索结果 -->
+    <view wx:if="{{keyword && searchResults.length > 0}}" class="section">
+      <view class="section-title">搜索结果</view>
+      <view wx:for="{{searchResults}}" wx:key="index" class="result-item" bindtap="selectAddress" data-index="{{index}}" data-type="search">
+        <view class="item-content">
+          <text class="item-name">{{searchResults[index].name}}</text>
+          <text class="item-address">{{searchResults[index].address}}</text>
+        </view>
+        <text class="item-distance">{{searchResults[index].distance}}</text>
+      </view>
+    </view>
+    
+    <!-- 无结果 -->
+    <view wx:if="{{keyword && searchResults.length === 0}}" class="no-results">
+      <text>未找到相关地址</text>
+    </view>
+  </view>
+</view>
